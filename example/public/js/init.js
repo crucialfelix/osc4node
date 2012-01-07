@@ -58,8 +58,8 @@ $(function() {
     
     $('#submit').click(function() {
         socket.emit('config', {
-            server: { port: parseInt($('.server .port').val()), host: 'localhost' },
-            client: { port: parseInt($('.client .port').val()), host: 'localhost' }
+            server: { port: parseInt($('.server .port').val(), 10), host: $('.server .host').val() },
+            client: { port: parseInt($('.client .port').val(), 10), host: $('.client .host').val() }
         });
     });
     $('#send .slider').change(function(e) {

@@ -4,7 +4,6 @@
   , "version": "0.1.0"
   , "author": "Hideyuki Saito <info@hideyukisaito.com>"
   , "dependencies": [
-        "socket.io >=0.6"
         "node-jspack": ">= 0.0.1"
     ]
   , "licenses": [{

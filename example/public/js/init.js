@@ -1,49 +1,48 @@
 $(function() {
     // create the socket for the local OSC server
-    var socket = new io.Socket("localhost", { port: 3000, rememberTransport: false });
+    var socket = io.connect();
     
     // bind callbacks for each events.
     socket.on('connect', function() {
         notify('System Connected');
     });
     
-    socket.on('message', function(obj) {
-        if ('oscmessage' in obj) {
-            var msg = obj.oscmessage
-              , addr = msg.address
-              , args = msg.args
-              , paprent;
+    socket.on('oscmessage', function(obj) {
+        var msg = obj
+          , addr = msg.address
+          , args = msg.args
+          , paprent;
+        
+        if (addr.match(/slider/i)) {
+            var slider = addr[addr.length - 1] == 'i'
+                    ? $('#receive .slider.int')
+                    : $('#receive .slider.float');
+            slider.val(args[0].value);
             
-            if (addr.match(/slider/i)) {
-                var slider = addr[addr.length - 1] == 'i'
-                        ? $('#receive .slider.int')
-                        : $('#receive .slider.float');
-                slider.val(args[0].value);
-                
-                paprent = slider.parent();
-                paprent.find('.addr').val(addr);
-                paprent.find('.numbox').val(args[0].value);
-                paprent.find('.output').val(addr + ' ' + args[0].value);
-            } else if (addr.match(/matrix/i)) {
-                var mat = $('#r' + args[0].value + args[1].value);
-                mat.attr('checked', args[2].value == 0 ? false : true);
-                
-                paprent = mat.parent().parent();
-                paprent.find('.addr').val(addr);
-                paprent.find('.numbox').val(args[0].value);
-                paprent.find('.output').val(addr + ' ' + args[0].value + ' ' + args[1].value + ' ' + args[2].value);
-            }
-            switch (msg.address) {
-                case '/max/matrix':
-                    $('#r' + msg.args[0].value + msg.args[1].value)
-                        .attr('checked', msg.args[2].value == 0 ? false : true);
-                    break;
-                default:
-                    break;
-            }
-        } else if ('info' in obj) {
-            notify(obj.info);
+            paprent = slider.parent();
+            paprent.find('.addr').val(addr);
+            paprent.find('.numbox').val(args[0].value);
+            paprent.find('.output').val(addr + ' ' + args[0].value);
+        } else if (addr.match(/matrix/i)) {
+            var mat = $('#r' + args[0].value + args[1].value);
+            mat.attr('checked', args[2].value == 0 ? false : true);
+            
+            paprent = mat.parent().parent();
+            paprent.find('.addr').val(addr);
+            paprent.find('.numbox').val(args[0].value);
+            paprent.find('.output').val(addr + ' ' + args[0].value + ' ' + args[1].value + ' ' + args[2].value);
         }
+        switch (msg.address) {
+            case '/max/matrix':
+                $('#r' + msg.args[0].value + msg.args[1].value)
+                    .attr('checked', msg.args[2].value == 0 ? false : true);
+                break;
+            default:
+                break;
+        }
+    });
+    socket.on('info', function(obj) {
+            notify(obj);
     });
     socket.on('disconnect', function() {
         notify('System Disconnected');
@@ -58,18 +57,11 @@ $(function() {
         notify('System Reconnected to server FAILED.');
     });
     
-    socket.connect();
-    
-    console.log(socket);
     $('#submit').click(function() {
-        if (socket.connected) {
-            socket.send({
-                config: {
-                    server: { port: parseInt($('.server .port').val()), host: 'localhost' },
-                    client: { port: parseInt($('.client .port').val()), host: 'localhost' }
-                }
-            });
-        }
+        socket.emit('config', {
+            server: { port: parseInt($('.server .port').val()), host: 'localhost' },
+            client: { port: parseInt($('.client .port').val()), host: 'localhost' }
+        });
     });
     $('#send .slider').change(function(e) {
         var self = $(this)
@@ -78,15 +70,11 @@ $(function() {
         self.siblings().children('.numbox').val(val);
         self.siblings().children('.output').val(addr + ' ' + val);
         
-        if (socket.connected) {
-            val = Math.floor(Number(val)) == val ? parseInt(val) : parseFloat(val);
-            socket.send({
-                oscmessage: {
-                    address: addr,
-                    message: val
-                }
-            });
-        }
+        val = Math.floor(Number(val)) == val ? parseInt(val) : parseFloat(val);
+        socket.emit('oscmessage', {
+            address: addr,
+            message: val
+        });
     });
     $('#send').find('.matrix-demo input').change(function(e) {
         var self = $(this)
@@ -99,14 +87,10 @@ $(function() {
         self.parent().siblings().children('.numbox').val(val);
         self.parent().siblings().children('.output').val(addr + ' ' + val);
         
-        if (socket.connected) {
-            socket.send({
-                oscmessage: {
-                    address: addr,
-                    message: [parseInt(id[1]), parseInt(id[2]), checked]
-                }
-            });
-        }
+        socket.emit('oscmessage', {
+            address: addr,
+            message: [parseInt(id[1]), parseInt(id[2]), checked]
+        });
     });
     
     function notify(msg) {

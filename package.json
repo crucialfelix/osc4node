@@ -3,9 +3,9 @@
   , "description": "OpenSoundControl implementation for node"
   , "version": "0.1.0"
   , "author": "Hideyuki Saito <info@hideyukisaito.com>"
-  , "dependencies": [
-        "node-jspack": ">= 0.0.1"
-    ]
+  , "dependencies": {
+        "jspack": ">= 0.0.1"
+    }
   , "licenses": [{
         "type": "MIT"
       , "url": "http://github.com/hideyukisaito/osc4node/blob/master/README.md"

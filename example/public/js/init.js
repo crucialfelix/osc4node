@@ -7,9 +7,8 @@ $(function() {
         notify('System Connected');
     });
     
-    socket.on('oscmessage', function(obj) {
-        var msg = obj
-          , addr = msg.address
+    socket.on('oscmessage', function(msg) {
+        var addr = msg.address
           , args = msg.args
           , paprent;
         
@@ -42,7 +41,7 @@ $(function() {
         }
     });
     socket.on('info', function(obj) {
-            notify(obj);
+        notify(obj);
     });
     socket.on('disconnect', function() {
         notify('System Disconnected');

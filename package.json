@@ -6,6 +6,10 @@
   , "dependencies": {
         "jspack": ">= 0.0.1"
     }
+  , "devDependencies": {
+  	    "mocha": "*"
+  	  , "should": "*"
+  	}
   , "licenses": [{
         "type": "MIT"
       , "url": "http://github.com/hideyukisaito/osc4node/blob/master/README.md"
